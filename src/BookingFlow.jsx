@@ -2,9 +2,9 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Check, ChevronRight, Info, Mail, Phone, User, Building2, MessageSquare, Sparkles, Lock, ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
 
 const fontStyle = `
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Manrope:wght@300;400;500;600;700;800&display=swap');
-  .font-display { font-family: 'Fraunces', Georgia, serif; }
-  .font-body { font-family: 'Manrope', system-ui, sans-serif; }
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap');
+  .font-display { font-family: 'Roboto', system-ui, sans-serif; font-weight: 500; }
+  .font-body { font-family: 'Roboto', system-ui, sans-serif; }
 `;
 
 const PRICES = {
@@ -24,7 +24,7 @@ const LABELS = {
   platform: { meta: 'Instagram + Facebook', linkedin: 'LinkedIn' },
   onboarding: { light: 'Onboarding Light', full: 'Onboarding Full' },
   package: { starter: 'Social Starter', standard: 'Social Standard', pro: 'Social Pro', enterprise: 'Social Enterprise' },
-  module: { A: 'Modul A · UGC-Briefing', B: 'Modul B · Foto-Shoot Quartal', C: 'Modul C · Content-Tag Quartal', D: 'Modul D · Content-Tag monatlich' },
+  module: { A: 'Modul A · Kunde liefert Material', B: 'Modul B · Foto-Shoot Quartal', C: 'Modul C · Content-Tag Quartal', D: 'Modul D · Content-Tag monatlich' },
   cm: { '4h': 'Community 4 h / Monat', '8h': 'Community 8 h / Monat', '15h': 'Community 15 h / Monat' },
 };
 
@@ -79,8 +79,8 @@ export default function BookingFlow() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const containerRef = useRef(null);
-const sidebarRef = useRef(null);
-const [sidebarOffset, setSidebarOffset] = useState(0);
+  const sidebarRef = useRef(null);
+  const [sidebarOffset, setSidebarOffset] = useState(0);
 
   // Höhen-Auto-Anpassung fürs iFrame
   useEffect(() => {
@@ -96,52 +96,47 @@ const [sidebarOffset, setSidebarOffset] = useState(0);
     return () => observer.disconnect();
   });
 
-// Sidebar folgt dem Scroll des Parent-Fensters (WordPress)
-useEffect(() => {
+  // Sidebar folgt dem Scroll des Parent-Fensters (WordPress) oder dem eigenen Scroll
+  useEffect(() => {
     const calculateOffset = (scrollY, iframeTop) => {
       if (!sidebarRef.current || !containerRef.current) return 0;
       const sidebarHeight = sidebarRef.current.offsetHeight;
       const containerHeight = containerRef.current.scrollHeight;
       const sidebarInitialTop = sidebarRef.current.offsetTop;
-      
+
       const relativeScroll = scrollY - iframeTop;
       let offset = 0;
-      
+
       if (relativeScroll > sidebarInitialTop) {
         const maxOffset = containerHeight - sidebarHeight - sidebarInitialTop - 100;
-        offset = Math.min(relativeScroll - sidebarInitialTop, maxOffset);
+        offset = Math.min(relativeScroll - sidebarInitialTop + 3, maxOffset);
       }
-      
+
       return window.innerWidth >= 1024 ? offset : 0;
     };
 
-    // Fall 1: Im iFrame – hört auf Parent-Scroll-Nachrichten
     const handleParentScroll = (event) => {
       if (event.data && event.data.type === 'parent-scroll') {
         setSidebarOffset(calculateOffset(event.data.scrollY, event.data.iframeTop));
       }
     };
-    
-    // Fall 2: Direkter Aufruf (kein iFrame) – hört auf eigenen Window-Scroll
+
     const handleOwnScroll = () => {
-      // Nur aktivieren, wenn wir NICHT in einem iFrame sind
       if (window.self === window.top) {
         setSidebarOffset(calculateOffset(window.scrollY, 0));
       }
     };
-    
+
     window.addEventListener('message', handleParentScroll);
     window.addEventListener('scroll', handleOwnScroll, { passive: true });
-    
-    // Initial ausführen
     handleOwnScroll();
-    
+
     return () => {
       window.removeEventListener('message', handleParentScroll);
       window.removeEventListener('scroll', handleOwnScroll);
     };
   }, []);
-  
+
   const calc = useMemo(() => {
     const pkgPrice = pkg ? PRICES.package[pkg] : 0;
     const modPrice = mod ? PRICES.module[mod] : 0;
@@ -206,9 +201,9 @@ useEffect(() => {
 
   if (submitted) {
     return (
-      <div ref={containerRef} className="font-body bg-stone-100 p-6 lg:p-12">
+      <div ref={containerRef} className="font-body bg-white p-4 lg:p-8">
         <style>{fontStyle}</style>
-        <div className="max-w-3xl mx-auto bg-white rounded-3xl p-10 lg:p-16 shadow-sm">
+        <div className="max-w-3xl mx-auto bg-white rounded-3xl p-8 lg:p-12 shadow-sm border border-stone-100">
           <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mb-6">
             <Check size={32} className="text-emerald-700" strokeWidth={2.5} />
           </div>
@@ -238,23 +233,19 @@ useEffect(() => {
   }
 
   return (
-    <div ref={containerRef} className="font-body bg-stone-100">
+    <div ref={containerRef} className="font-body bg-white">
       <style>{fontStyle}</style>
-      <div className="max-w-7xl mx-auto p-6 lg:p-12">
+      <div className="max-w-7xl mx-auto p-4 lg:p-8">
 
-        <header className="mb-10 pb-8 border-b border-stone-200 flex items-end justify-between flex-wrap gap-4">
+        <header className="mb-8 pb-6 border-b border-stone-200">
           <div>
             <div className="text-xs tracking-widest text-stone-500 uppercase font-semibold mb-2">Social Media Anfrage</div>
-            <h1 className="font-display text-4xl lg:text-6xl text-stone-900 leading-none">Angebot <em className="italic font-light text-stone-500">konfigurieren</em></h1>
-          </div>
-          <div className="text-right">
-            <div className="font-display italic text-2xl text-stone-900">LennArt</div>
-            <div className="text-xs text-stone-500 tracking-wide">Productions · Lebach</div>
+            <h1 className="font-display text-4xl lg:text-5xl text-stone-900 leading-none">Angebot <em className="italic font-light text-stone-500">konfigurieren</em></h1>
           </div>
         </header>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-12">
+        <div className="grid lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-10">
 
             <section>
               <SectionHeader num="01" title="Plattform wählen" required subtitle="Eine Plattform pro Paket" />
@@ -301,10 +292,10 @@ useEffect(() => {
               <SectionHeader num="03" title="Basis-Paket" required subtitle="Verwertung & Posting" />
               <div className="grid md:grid-cols-2 gap-3">
                 {[
-                  { id: 'starter', name: 'Social Starter', posts: '4 Beiträge / Monat', reels: '1 Reel', price: 490, accent: 'starter' },
-                  { id: 'standard', name: 'Social Standard', posts: '8 Beiträge / Monat', reels: '3 Reels · Stories 2×/W', price: 890, accent: 'standard' },
-                  { id: 'pro', name: 'Social Pro', posts: '16 Beiträge / Monat', reels: '6 Reels · Stories 4×/W', price: 1590, accent: 'pro', badge: 'Empfohlen' },
-                  { id: 'enterprise', name: 'Social Enterprise', posts: '20+ Beiträge / Monat', reels: 'Multi-Brand · individuell', price: 2890, prefix: 'ab', accent: 'enterprise' },
+                  { id: 'starter', name: 'Social Starter', posts: '4 Beiträge / Monat', price: 490, accent: 'starter' },
+                  { id: 'standard', name: 'Social Standard', posts: '8 Beiträge / Monat', price: 890, accent: 'standard' },
+                  { id: 'pro', name: 'Social Pro', posts: '16 Beiträge / Monat', price: 1590, accent: 'pro', badge: 'Empfohlen' },
+                  { id: 'enterprise', name: 'Social Enterprise', posts: '20+ Beiträge / Monat', price: 2890, prefix: 'ab', accent: 'enterprise' },
                 ].map(p => (
                   <SelectCard key={p.id} selected={pkg === p.id} onClick={() => setPkg(p.id)} accent={p.accent}>
                     <div className="flex items-start justify-between mb-2">
@@ -317,7 +308,6 @@ useEffect(() => {
                       </div>
                     </div>
                     <div className="text-sm text-stone-700 font-medium">{p.posts}</div>
-                    <div className="text-xs text-stone-500">{p.reels}</div>
                   </SelectCard>
                 ))}
               </div>
@@ -327,10 +317,10 @@ useEffect(() => {
               <SectionHeader num="04" title="Content-Modul" required subtitle="Woher kommt das Material?" />
               <div className="grid md:grid-cols-2 gap-3">
                 {[
-                  { id: 'A', name: 'UGC-Briefing', desc: 'Kunde liefert Rohmaterial nach monatlicher Shotlist. Bei Nichtlieferung Stock-Fallback.', price: 90, accent: 'modA' },
-                  { id: 'B', name: 'Foto-Shoot Quartal', desc: '1× pro Quartal 3h Foto-Termin. 30–50 bearbeitete Bilder. Keine Videos.', price: 290, accent: 'modB' },
-                  { id: 'C', name: 'Content-Tag Quartal', desc: '1× pro Quartal ganztägiger Dreh (Foto + Video). ~40 Assets, 8–12 Reels.', price: 790, accent: 'modC' },
-                  { id: 'D', name: 'Content-Tag monatlich', desc: 'Monatlich voller Content-Tag inkl. Schnitt, Musik, Farbkorrektur, Sound.', price: 2400, accent: 'modD', premium: true },
+                  { id: 'A', name: 'Kunde liefert Material', desc: 'Der Kunde stellt selbst Fotos und Videos bereit – nach monatlicher Shotlist und Briefing. Bei fehlendem Material greifen wir auf Stock zurück.', price: 90, accent: 'modA' },
+                  { id: 'B', name: 'Foto-Shoot Quartal', desc: '1× pro Quartal 3h Foto-Termin vor Ort. Bearbeitete Bilder in deiner Bildsprache. Keine Videos.', price: 290, accent: 'modB' },
+                  { id: 'C', name: 'Content-Tag Quartal', desc: '1× pro Quartal ganztägiger Dreh vor Ort. Foto- und Videomaterial für die folgenden Monate.', price: 790, accent: 'modC' },
+                  { id: 'D', name: 'Content-Tag monatlich', desc: 'Monatlich voller Content-Tag inkl. Schnitt, lizenzierter Musik, Farbkorrektur und Sound-Design.', price: 2400, accent: 'modD', premium: true },
                 ].map(m => (
                   <SelectCard key={m.id} selected={mod === m.id} onClick={() => setMod(m.id)} accent={m.accent}>
                     <div className="flex items-start justify-between mb-2">
@@ -388,7 +378,7 @@ useEffect(() => {
                 <div className="p-5 rounded-2xl border-2 border-dashed border-stone-300 bg-stone-50">
                   <div className="text-[10px] tracking-widest uppercase font-bold text-stone-500 mb-2">Auf Anfrage</div>
                   <div className="font-display text-lg text-stone-700 mb-2">Einzelposten</div>
-                  <div className="text-xs text-stone-600 leading-relaxed">Zusatz-Reel (140 €), Spontan-Dreh (ab 390 €), Workshop-Tag (890 €) ad-hoc dazubuchbar.</div>
+                  <div className="text-xs text-stone-600 leading-relaxed">Zusatz-Reel (140 €), Spontan-Dreh (ab 390 €), Workshop-Tag (890 €).</div>
                 </div>
               </div>
             </section>
@@ -498,7 +488,7 @@ useEffect(() => {
           </aside>
         </div>
 
-        <footer className="mt-16 pt-8 border-t border-stone-200 text-xs text-stone-500 flex justify-between flex-wrap gap-2">
+        <footer className="mt-12 pt-6 border-t border-stone-200 text-xs text-stone-500 flex justify-between flex-wrap gap-2">
           <span className="font-display italic text-base text-stone-700">LennArt Productions</span>
           <span>Konfigurator 2026</span>
         </footer>
