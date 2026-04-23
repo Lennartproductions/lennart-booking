@@ -97,30 +97,49 @@ const [sidebarOffset, setSidebarOffset] = useState(0);
   });
 
 // Sidebar folgt dem Scroll des Parent-Fensters (WordPress)
-  useEffect(() => {
+useEffect(() => {
+    const calculateOffset = (scrollY, iframeTop) => {
+      if (!sidebarRef.current || !containerRef.current) return 0;
+      const sidebarHeight = sidebarRef.current.offsetHeight;
+      const containerHeight = containerRef.current.scrollHeight;
+      const sidebarInitialTop = sidebarRef.current.offsetTop;
+      
+      const relativeScroll = scrollY - iframeTop;
+      let offset = 0;
+      
+      if (relativeScroll > sidebarInitialTop) {
+        const maxOffset = containerHeight - sidebarHeight - sidebarInitialTop - 100;
+        offset = Math.min(relativeScroll - sidebarInitialTop, maxOffset);
+      }
+      
+      return window.innerWidth >= 1024 ? offset : 0;
+    };
+
+    // Fall 1: Im iFrame – hört auf Parent-Scroll-Nachrichten
     const handleParentScroll = (event) => {
       if (event.data && event.data.type === 'parent-scroll') {
-        if (!sidebarRef.current || !containerRef.current) return;
-        const iframeTop = event.data.iframeTop;
-        const scrollY = event.data.scrollY;
-        const viewportHeight = event.data.viewportHeight;
-        const sidebarHeight = sidebarRef.current.offsetHeight;
-        const containerHeight = containerRef.current.scrollHeight;
-        
-        const relativeScroll = scrollY - iframeTop;
-        let offset = 0;
-        
-        if (relativeScroll > 0) {
-          const maxOffset = containerHeight - sidebarHeight - 100;
-          offset = Math.min(Math.max(relativeScroll + 1, 0), maxOffset);
-        }
-        
-        setSidebarOffset(window.innerWidth >= 1024 ? offset : 0);
+        setSidebarOffset(calculateOffset(event.data.scrollY, event.data.iframeTop));
+      }
+    };
+    
+    // Fall 2: Direkter Aufruf (kein iFrame) – hört auf eigenen Window-Scroll
+    const handleOwnScroll = () => {
+      // Nur aktivieren, wenn wir NICHT in einem iFrame sind
+      if (window.self === window.top) {
+        setSidebarOffset(calculateOffset(window.scrollY, 0));
       }
     };
     
     window.addEventListener('message', handleParentScroll);
-    return () => window.removeEventListener('message', handleParentScroll);
+    window.addEventListener('scroll', handleOwnScroll, { passive: true });
+    
+    // Initial ausführen
+    handleOwnScroll();
+    
+    return () => {
+      window.removeEventListener('message', handleParentScroll);
+      window.removeEventListener('scroll', handleOwnScroll);
+    };
   }, []);
   
   const calc = useMemo(() => {
