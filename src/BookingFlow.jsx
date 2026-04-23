@@ -237,12 +237,7 @@ export default function BookingFlow() {
       <style>{fontStyle}</style>
       <div className="max-w-7xl mx-auto p-4 lg:p-8">
 
-        <header className="mb-8 pb-6 border-b border-stone-200">
-          <div>
-            <div className="text-xs tracking-widest text-stone-500 uppercase font-semibold mb-2">Social Media Anfrage</div>
-            <h1 className="font-display text-4xl lg:text-5xl text-stone-900 leading-none">Angebot <em className="italic font-light text-stone-500">konfigurieren</em></h1>
-          </div>
-        </header>
+      
 
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-10">
