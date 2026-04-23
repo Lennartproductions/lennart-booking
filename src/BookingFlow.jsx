@@ -155,7 +155,8 @@ export default function BookingFlow() {
     };
   }, [pkg, mod, addons, duration, onboarding]);
 
-  const canSubmit = platform && onboarding && pkg && mod && contact.name && contact.email && contact.company && contact.consent;
+  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+  const canSubmit = platform && onboarding && pkg && mod && contact.name && isValidEmail(contact.email) && contact.company && contact.consent;
 
   const handleSubmit = async () => {
     if (!canSubmit || submitting) return;
@@ -411,7 +412,10 @@ export default function BookingFlow() {
                   </label>
                   <label className="block">
                     <span className="text-xs font-semibold text-stone-700 mb-1 flex items-center gap-2"><Mail size={12} /> E-Mail *</span>
-                    <input type="email" value={contact.email} onChange={e => setContact({ ...contact, email: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-stone-900 focus:outline-none text-sm" placeholder="max@musterfirma.de" />
+                   <input type="email" value={contact.email} onChange={e => setContact({ ...contact, email: e.target.value })} className={`w-full px-4 py-3 rounded-xl border focus:outline-none text-sm ${contact.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(contact.email) ? 'border-rose-400 focus:border-rose-600' : 'border-stone-200 focus:border-stone-900'}`} placeholder="max@musterfirma.de" />
+{contact.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(contact.email) && (
+  <span className="text-[11px] text-rose-600 mt-1 block">Bitte eine gültige E-Mail-Adresse eingeben</span>
+)}
                   </label>
                   <label className="block">
                     <span className="text-xs font-semibold text-stone-700 mb-1 flex items-center gap-2"><Phone size={12} /> Telefon (optional)</span>
