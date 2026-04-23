@@ -96,6 +96,33 @@ const [sidebarOffset, setSidebarOffset] = useState(0);
     return () => observer.disconnect();
   });
 
+// Sidebar folgt dem Scroll des Parent-Fensters (WordPress)
+  useEffect(() => {
+    const handleParentScroll = (event) => {
+      if (event.data && event.data.type === 'parent-scroll') {
+        if (!sidebarRef.current || !containerRef.current) return;
+        const iframeTop = event.data.iframeTop;
+        const scrollY = event.data.scrollY;
+        const viewportHeight = event.data.viewportHeight;
+        const sidebarHeight = sidebarRef.current.offsetHeight;
+        const containerHeight = containerRef.current.scrollHeight;
+        
+        const relativeScroll = scrollY - iframeTop;
+        let offset = 0;
+        
+        if (relativeScroll > 0) {
+          const maxOffset = containerHeight - sidebarHeight - 100;
+          offset = Math.min(Math.max(relativeScroll + 24, 0), maxOffset);
+        }
+        
+        setSidebarOffset(window.innerWidth >= 1024 ? offset : 0);
+      }
+    };
+    
+    window.addEventListener('message', handleParentScroll);
+    return () => window.removeEventListener('message', handleParentScroll);
+  }, []);
+  
   const calc = useMemo(() => {
     const pkgPrice = pkg ? PRICES.package[pkg] : 0;
     const modPrice = mod ? PRICES.module[mod] : 0;
