@@ -79,6 +79,8 @@ export default function BookingFlow() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const containerRef = useRef(null);
+const sidebarRef = useRef(null);
+const [sidebarOffset, setSidebarOffset] = useState(0);
 
   // Höhen-Auto-Anpassung fürs iFrame
   useEffect(() => {
