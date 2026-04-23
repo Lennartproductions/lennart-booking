@@ -112,7 +112,7 @@ const [sidebarOffset, setSidebarOffset] = useState(0);
         
         if (relativeScroll > 0) {
           const maxOffset = containerHeight - sidebarHeight - 100;
-          offset = Math.min(Math.max(relativeScroll + 2, 0), maxOffset);
+          offset = Math.min(Math.max(relativeScroll + 1, 0), maxOffset);
         }
         
         setSidebarOffset(window.innerWidth >= 1024 ? offset : 0);
