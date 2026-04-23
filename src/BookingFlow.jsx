@@ -107,9 +107,9 @@ export default function BookingFlow() {
       const relativeScroll = scrollY - iframeTop;
       let offset = 0;
 
-      if (relativeScroll > sidebarInitialTop) {
-        const maxOffset = containerHeight - sidebarHeight - sidebarInitialTop - 100;
-        offset = Math.min(relativeScroll - sidebarInitialTop + 3, maxOffset);
+  if (relativeScroll > sidebarInitialTop) {
+        const maxOffset = Math.max(0, containerHeight - sidebarHeight - sidebarInitialTop - 100);
+        offset = Math.max(0, Math.min(relativeScroll - sidebarInitialTop + 3, maxOffset));
       }
 
       return window.innerWidth >= 1024 ? offset : 0;
