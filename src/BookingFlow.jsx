@@ -398,7 +398,7 @@ export default function BookingFlow() {
           </div>
 
           <aside className="lg:col-span-1">
-            <div className="lg:sticky lg:top-6 bg-white rounded-3xl p-6 shadow-sm border border-stone-200">
+             <div ref={sidebarRef} style={{ transform: `translateY(${sidebarOffset}px)`, transition: 'transform 0.1s ease-out' }} className="bg-white rounded-3xl p-6 shadow-sm border border-stone-200">
               <div className="flex items-center gap-2 mb-5">
                 <Sparkles size={16} className="text-amber-600" />
                 <h3 className="font-display text-xl text-stone-900">Dein Angebot</h3>
